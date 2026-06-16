@@ -1,0 +1,149 @@
+---
+title: "Chapter 12 Notes"
+subtitle: "mutate() and case_when()"
+author: "Kylie George"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    embed-resources: true
+---
+
+# Quarto Notes
+
+# Load Packages
+```{r}
+library("dslabs")
+library("dplyr")
+```
+
+
+# Vectorized Conditionals
+evaluate conditions element-by-element across a vector and return a new vector of the same length.
+
+In other words, subsetting answers “What do I keep?” while vectorized conditionals answer “What value should I return for each element?”
+
+```{r}
+# 📖 Review
+## Create vector x
+x <- 1:6
+## logical vector
+x > 3
+
+# 📖 Review
+## logical subsetting
+x[x > 3]
+```
+🗣 x[x > 3] subsets x to keep only values greater than 3.
+
+```{r}
+# 📖 Review
+## replaces values
+x[x > 3] <- 99
+## ✅  print result
+x
+```
+🗣 x[x > 3] subsets x to keep only the values greater than 3, and x[x > 3] <- 99 uses logical indexing to replace those matching values with 99.
+
+## ifelse()
+Base R describes ifelse() as returning a value with the same shape as the test, filled from yes or no.
+
+📜 The SYNTAX: ifelse(test, yes, no)
+test – logical vector (TRUE/FALSE/NA)
+yes – value to insert where test is TRUE
+no – value to insert where test is FALSE.
+NA – if NA, the result is NA at that position.
+
+🎯 Label the vector of numbers greater than 3 as “Large” and others as “Small”.
+
+```{r}
+x <- c(3, 2, 3, 6, 5)
+length(x)
+```
+🗣 `x` is a vector with `{r} length(x)` values.
+
+```{r}
+ifelse(test = x >3, yes = "Large", no = "Small")
+```
+💡 Tip: Read this ifelse() statement like ‘If the vector is greater than 3, then return “Large”, otherwise return “Small”.’
+
+🗣 The output positions for 3 and under are “Small” and numbers higher than 3 are “Large”.
+
+🧐 Notice: Arguments, such as test, yes, and no in ifelse(), are often not required to be named inside of functions.
+
+
+```{r}
+length(ifelse(x > 3, "Large", "Small"))
+```
+
+🗣 The result has the same length as x. Nothing was dropped. Each position got a label.
+
+## case_when()
+dplyr describes case_when() as a general vectorized if-else that evaluates rules in order and uses the first match for each element. This makes it especially useful when you have several categories to assign.
+
+📜 The SYNTAX: case_when(condition1 ~ value1, condition2 ~ value2, .default = default_value)
+
+🎯 Label the vector of numbers greater than 3 as “Large” and others as “Small”.
+
+```{r}
+case_when(c(3, 2, 3, 6, 5) > 3 ~ "Large", .default = "Small")
+
+```
+🗣 The output positions for 3 and under are “Small” and numbers higher than 3 are “Large”.
+
+📖 Why do we need both ifelse() and case_when()? case_when() is usually clearer once you have 3+ categories.
+
+## More than Two Categories
+ifelse() is designed for two categories. If you have more than two, you can nest ifelse() statements inside each other, but this quickly becomes hard to read. case_when() is designed for multiple categories and is much easier to read when you have more than two conditions.
+
+```{r}
+scores <- c(55, 65, 75, 85, 95)
+```
+🎯 Re-code scores less than 60 as “Low”, scores less than 80 as “Medium”, and all others as “High”.
+
+### Nested ifelse()
+🎯 Re-code scores less than 60 as “Low”, scores less than 80 as “Medium”, and all others as “High” using nested ifelse().
+
+```{r}
+ifelse(scores < 60, "Low",
+       ifelse(scores < 80, "Medium", "High"))
+```
+🗣 This works, but the logic is nested inside the no argument of the first ifelse(), which becomes harder to read as the number of categories grows.
+
+### Multiple Rule case_when()
+case_when() avoids the ugly nesting that happens with repeated ifelse() calls. It is a general vectorized if-else: R checks the rules from top to bottom and uses the first rule that matches each element. That is why the order of the rules matters.
+
+🎯 Code scores less than 60 as "Low", scores less than 80 as "Medium", and all others as "High" using case_when().
+
+```{r}
+case_when(scores < 60 ~ "Low",
+          scores < 80 ~ "Medium",
+          TRUE        ~ "High")
+```
+🗣 This reads more like a set of classification rules: first check for "Low", then check for "Medium", and assign "High" to everything else.
+
+⚠️ The order of the rules matters because case_when() uses the first condition that matches.
+
+🐱 This is a good place to be curious and test what happens when the rules are in the wrong order. The goal is not to break the code randomly; the goal is to see how case_when() makes its decision.
+```{r}
+case_when(
+  scores < 80 ~ "Medium",
+  scores < 60 ~ "Low",
+  TRUE       ~ "High"
+)
+```
+🗣 This does not work as intended. Any score less than 60 also satisfies scores < 80, so those values are labeled "Medium" before R ever checks the "Low" rule.
+
+💡 Tip: write rules from most specific to more general, and end with a default rule such as TRUE ~ "High".
+
+# mutate()
+
+## Column Copy
+
+### mutate() with Arithmetic
+
+### case_when() inside mutate()
+
+## Overwrite Column Values
